@@ -154,7 +154,7 @@ def scale(img,factor):
 # 3. Load the two input images
 #imageA = cv2.imread(args["first"])
 #imageB = cv2.imread(args["second"])
-def ssim(imageA,imageB):
+def ssim(imageB,imageA):
     # 4. Convert the images to grayscale
     grayA = cv2.cvtColor(imageA, cv2.COLOR_BGR2GRAY) #image that will be compared
     grayB = cv2.cvtColor(imageB, cv2.COLOR_BGR2GRAY) #image that will be used to compare
@@ -182,7 +182,7 @@ def psnrfunc(img_orig, img_out):
 # In[17]:
 
 
-def ms_SSIM(a,b): #or MS psnr 
+def ms_SSIM(img_orig,img_out): #or MS psnr 
     #MS_SSIM_val = ms_ssim( a, b, data_range=1, size_average=False )
     return 0
 
@@ -332,7 +332,7 @@ try:
                 ms_SSIM_HDRgt_SDR = (0,8,'ms_SSIM_HDRgt_SDR')
                 ms_SSIM_SDR_HDR = (0,9,'ms_SSIM_SDR_HDR')
                 
-                S_GTHDR = ssim(HDRgtPic,HDRpic)
+                S_GTHDR = ssim(HDRgtPic,HDRpic) #(image that will be used to compare,image that will be compared)
                 S_GTSDR = ssim(HDRgtPic,SDRpic)
                 S_HDSDR = ssim(HDRpic,SDRpic)
                 
