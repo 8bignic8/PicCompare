@@ -1,25 +1,28 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[ ]:
+# In[1]:
 
 
 import numpy as np
-import imageio
-import mat73
 import os
 import cv2
-import random
 import time
 import csv
 import sys
 from skimage.measure import compare_ssim
 import math
 from xlwt import Workbook
-#from psnrhvsm import psnrhvsm
+from pytorch_msssim import ssim, ms_ssim, SSIM, MS_SSIM
 
 
 # In[ ]:
+
+
+
+
+
+# In[2]:
 
 
 ##global Variable default state
@@ -46,7 +49,7 @@ global HDRgenPic
 global data
 
 
-# In[ ]:
+# In[3]:
 
 
 #Read Picture and return it
@@ -62,7 +65,7 @@ def readThePicture(picturepath):
     return img
 
 
-# In[ ]:
+# In[4]:
 
 
 def readCSV(file):
@@ -72,7 +75,7 @@ def readCSV(file):
     return result
 
 
-# In[ ]:
+# In[5]:
 
 
 def savePic(picture,fileName,extention,outPath): #saves the given array as a pictures to the given output path
@@ -88,7 +91,7 @@ def savePic(picture,fileName,extention,outPath): #saves the given array as a pic
         print('--------------------')
 
 
-# In[ ]:
+# In[6]:
 
 
 def horStack(startPic,addPic):
@@ -107,7 +110,7 @@ def horStack(startPic,addPic):
     return together 
 
 
-# In[ ]:
+# In[7]:
 
 
 def vertStack(startPic,addPic):
@@ -124,7 +127,7 @@ def vertStack(startPic,addPic):
     return together 
 
 
-# In[ ]:
+# In[8]:
 
 
 def scale(img,factor):
@@ -134,7 +137,7 @@ def scale(img,factor):
     return img_new
 
 
-# In[ ]:
+# In[9]:
 
 
 # Usage:
@@ -166,7 +169,7 @@ def ssim(imageA,imageB):
     return score
 
 
-# In[ ]:
+# In[10]:
 
 
 def psnrfunc(img_orig, img_out):
@@ -176,15 +179,15 @@ def psnrfunc(img_orig, img_out):
     return psnr
 
 
-# In[ ]:
+# In[17]:
 
 
-##https://pypi.org/project/psnr-hvsm/
-def mpsnr(a,b):
+def ms_SSIM(a,b): #or MS psnr 
+    #MS_SSIM_val = ms_ssim( a, b, data_range=1, size_average=False )
     return 0
 
 
-# In[ ]:
+# In[12]:
 
 
 def text(Wtext,img):
@@ -213,7 +216,7 @@ def text(Wtext,img):
     return image
 
 
-# In[ ]:
+# In[13]:
 
 
 def inputData():
@@ -265,7 +268,7 @@ def inputData():
 inputData()
 
 
-# In[ ]:
+# In[14]:
 
 
 start_time = time.time() #start the timeing of the Prgramm
@@ -325,9 +328,9 @@ try:
                 psnr_HDRgt_SDR = (0,5,'psnr_HDRgt_SDR')
                 psnr_SDR_HDR = (0,6,'psnr_SDR_HDR')
                 
-                mpsnr_HDRgt_HDR = (0,7,'mpsnr_HDRgt_HDR')
-                mpsnr_HDRgt_SDR = (0,8,'mpsnr_HDRgt_SDR')
-                mpsnr_SDR_HDR = (0,9,'mpsnr_SDR_HDR')
+                ms_SSIM_HDRgt_HDR = (0,7,'ms_SSIM_HDRgt_HDR')
+                ms_SSIM_HDRgt_SDR = (0,8,'ms_SSIM_HDRgt_SDR')
+                ms_SSIM_SDR_HDR = (0,9,'ms_SSIM_SDR_HDR')
                 
                 S_GTHDR = ssim(HDRgtPic,HDRpic)
                 S_GTSDR = ssim(HDRgtPic,SDRpic)
@@ -337,9 +340,9 @@ try:
                 P_GTSDR = psnrfunc(HDRgtPic,SDRpic)
                 P_HDSDR = psnrfunc(HDRpic,SDRpic)
 
-                mP_GTHDR = mpsnr(HDRgtPic,HDRpic)
-                mP_GTSDR = mpsnr(HDRgtPic,SDRpic)
-                mP_HDSDR = mpsnr(HDRpic,SDRpic)
+                mS_GTHDR = ms_SSIM(HDRgtPic,HDRpic)
+                mS_GTSDR = ms_SSIM(HDRgtPic,SDRpic)
+                mS_HDSDR = ms_SSIM(HDRpic,SDRpic)
                 
                 ##Reinhard save datapath
                 if(tmo_path[tmo]=='reinhard/'):
@@ -352,9 +355,9 @@ try:
                         reinhard.write(psnr_HDRgt_HDR[0],psnr_HDRgt_HDR[1],psnr_HDRgt_HDR[2])
                         reinhard.write(psnr_HDRgt_SDR[0],psnr_HDRgt_SDR[1],psnr_HDRgt_SDR[2])
                         reinhard.write(psnr_SDR_HDR[0],psnr_SDR_HDR[1],psnr_SDR_HDR[2])
-                        reinhard.write(mpsnr_HDRgt_HDR[0],mpsnr_HDRgt_HDR[1],mpsnr_HDRgt_HDR[2])
-                        reinhard.write(mpsnr_HDRgt_SDR[0],mpsnr_HDRgt_SDR[1],mpsnr_HDRgt_SDR[2])
-                        reinhard.write(mpsnr_SDR_HDR[0],mpsnr_SDR_HDR[1],mpsnr_SDR_HDR[2])
+                        reinhard.write(ms_SSIM_HDRgt_HDR[0],ms_SSIM_HDRgt_HDR[1],ms_SSIM_HDRgt_HDR[2])
+                        reinhard.write(ms_SSIM_HDRgt_SDR[0],ms_SSIM_HDRgt_SDR[1],ms_SSIM_HDRgt_SDR[2])
+                        reinhard.write(ms_SSIM_SDR_HDR[0],ms_SSIM_SDR_HDR[1],ms_SSIM_SDR_HDR[2])
                         
                     ###number
                     
@@ -372,11 +375,11 @@ try:
                     reinhard.write(i+1,5, P_GTSDR)
                     reinhard.write(i+1,6, P_HDSDR)
                     
-                    ####mpsnr
+                    ####ms_SSIM
                     
-                    reinhard.write(i+1,7, mP_GTHDR)
-                    reinhard.write(i+1,8, mP_GTSDR) 
-                    reinhard.write(i+1,9, mP_HDSDR)
+                    reinhard.write(i+1,7, mS_GTHDR)
+                    reinhard.write(i+1,8, mS_GTSDR) 
+                    reinhard.write(i+1,9, mS_HDSDR)
 
                 elif(tmo_path[tmo] == 'mantiuk/'):
                     
@@ -388,9 +391,9 @@ try:
                         mantiuk.write(psnr_HDRgt_HDR[0],psnr_HDRgt_HDR[1],psnr_HDRgt_HDR[2])
                         mantiuk.write(psnr_HDRgt_SDR[0],psnr_HDRgt_SDR[1],psnr_HDRgt_SDR[2])
                         mantiuk.write(psnr_SDR_HDR[0],psnr_SDR_HDR[1],psnr_SDR_HDR[2])
-                        mantiuk.write(mpsnr_HDRgt_HDR[0],mpsnr_HDRgt_HDR[1],mpsnr_HDRgt_HDR[2])
-                        mantiuk.write(mpsnr_HDRgt_SDR[0],mpsnr_HDRgt_SDR[1],mpsnr_HDRgt_SDR[2])
-                        mantiuk.write(mpsnr_SDR_HDR[0],mpsnr_SDR_HDR[1],mpsnr_SDR_HDR[2])
+                        mantiuk.write(ms_SSIM_HDRgt_HDR[0],ms_SSIM_HDRgt_HDR[1],ms_SSIM_HDRgt_HDR[2])
+                        mantiuk.write(ms_SSIM_HDRgt_SDR[0],ms_SSIM_HDRgt_SDR[1],ms_SSIM_HDRgt_SDR[2])
+                        mantiuk.write(ms_SSIM_SDR_HDR[0],ms_SSIM_SDR_HDR[1],ms_SSIM_SDR_HDR[2])
                         
                     ###number
                     
@@ -408,11 +411,11 @@ try:
                     mantiuk.write(i+1,5, P_GTSDR)
                     mantiuk.write(i+1,6, P_HDSDR)
                     
-                    ####mpsnr
+                    ####ms_SSIM
                     
-                    mantiuk.write(i+1,7, mP_GTHDR)
-                    mantiuk.write(i+1,8, mP_GTSDR) 
-                    mantiuk.write(i+1,9, mP_HDSDR)
+                    mantiuk.write(i+1,7, mS_GTHDR)
+                    mantiuk.write(i+1,8, mS_GTSDR) 
+                    mantiuk.write(i+1,9, mS_HDSDR)
                     
                 elif(tmo_path[tmo]=='drago/'):
                     if(firstRun):
@@ -423,9 +426,9 @@ try:
                         drago.write(psnr_HDRgt_HDR[0],psnr_HDRgt_HDR[1],psnr_HDRgt_HDR[2])
                         drago.write(psnr_HDRgt_SDR[0],psnr_HDRgt_SDR[1],psnr_HDRgt_SDR[2])
                         drago.write(psnr_SDR_HDR[0],psnr_SDR_HDR[1],psnr_SDR_HDR[2])
-                        drago.write(mpsnr_HDRgt_HDR[0],mpsnr_HDRgt_HDR[1],mpsnr_HDRgt_HDR[2])
-                        drago.write(mpsnr_HDRgt_SDR[0],mpsnr_HDRgt_SDR[1],mpsnr_HDRgt_SDR[2])
-                        drago.write(mpsnr_SDR_HDR[0],mpsnr_SDR_HDR[1],mpsnr_SDR_HDR[2])
+                        drago.write(ms_SSIM_HDRgt_HDR[0],ms_SSIM_HDRgt_HDR[1],ms_SSIM_HDRgt_HDR[2])
+                        drago.write(ms_SSIM_HDRgt_SDR[0],ms_SSIM_HDRgt_SDR[1],ms_SSIM_HDRgt_SDR[2])
+                        drago.write(ms_SSIM_SDR_HDR[0],ms_SSIM_SDR_HDR[1],ms_SSIM_SDR_HDR[2])
                     
                     ###number
                     
@@ -443,11 +446,11 @@ try:
                     drago.write(i+1,5, P_GTSDR)
                     drago.write(i+1,6, P_HDSDR)
                     
-                    ####mpsnr
+                    ####ms_SSIM
                     
-                    drago.write(i+1,7, mP_GTHDR)
-                    drago.write(i+1,8, mP_GTSDR) 
-                    drago.write(i+1,9, mP_HDSDR)
+                    drago.write(i+1,7, mS_GTHDR)
+                    drago.write(i+1,8, mS_GTSDR) 
+                    drago.write(i+1,9, mS_HDSDR)
                     
                 elif(tmo_path[tmo]=='linear/'):
                     if(firstRun):
@@ -458,9 +461,9 @@ try:
                         linear.write(psnr_HDRgt_HDR[0],psnr_HDRgt_HDR[1],psnr_HDRgt_HDR[2])
                         linear.write(psnr_HDRgt_SDR[0],psnr_HDRgt_SDR[1],psnr_HDRgt_SDR[2])
                         linear.write(psnr_SDR_HDR[0],psnr_SDR_HDR[1],psnr_SDR_HDR[2])
-                        linear.write(mpsnr_HDRgt_HDR[0],mpsnr_HDRgt_HDR[1],mpsnr_HDRgt_HDR[2])
-                        linear.write(mpsnr_HDRgt_SDR[0],mpsnr_HDRgt_SDR[1],mpsnr_HDRgt_SDR[2])
-                        linear.write(mpsnr_SDR_HDR[0],mpsnr_SDR_HDR[1],mpsnr_SDR_HDR[2])
+                        linear.write(ms_SSIM_HDRgt_HDR[0],ms_SSIM_HDRgt_HDR[1],ms_SSIM_HDRgt_HDR[2])
+                        linear.write(ms_SSIM_HDRgt_SDR[0],ms_SSIM_HDRgt_SDR[1],ms_SSIM_HDRgt_SDR[2])
+                        linear.write(ms_SSIM_SDR_HDR[0],ms_SSIM_SDR_HDR[1],ms_SSIM_SDR_HDR[2])
                         firstRun = False
                     
                     ###number
@@ -479,11 +482,11 @@ try:
                     linear.write(i+1,5, P_GTSDR)
                     linear.write(i+1,6, P_HDSDR)
                     
-                    ####mpsnr
+                    ####ms_SSIM
                     
-                    linear.write(i+1,7, mP_GTHDR)
-                    linear.write(i+1,8, mP_GTSDR) 
-                    linear.write(i+1,9, mP_HDSDR)
+                    linear.write(i+1,7, mS_GTHDR)
+                    linear.write(i+1,8, mS_GTSDR) 
+                    linear.write(i+1,9, mS_HDSDR)
                     
                     
                 wb.save(xlsPath+str(mashinePath.split('/')[1])+'.xls')     
@@ -509,7 +512,18 @@ try:
               #  savePic(picTure[],(str(i)+'Result_ColorSpace'+picName),'png',result)
         
 except: 
-    print('There was an error while finding the pictures to compare')
-    print('Picture name to find: '+picName) 
+    print('There was an error while finding the pictures to compare') 
 print('Finished and it took: '+str((time.time() - start_time)/60)+'minutes')
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
 

@@ -2,3 +2,4 @@ conda install scikit-image
 
 Pip install torch
 Pip install numpy
+pip install xlwt
