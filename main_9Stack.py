@@ -394,7 +394,7 @@ try:
                     ###number
                     
                     reinhard.write(i+1,0, currentFileName.split('.')[0])
-                    print('HSI')
+
                     ####SSIM
                     
                     reinhard.write(i+1,1, S_GTHDR)
@@ -408,11 +408,10 @@ try:
                     reinhard.write(i+1,6, P_HDSDR)
                     
                     ####ms_SSIM
-                    print('HSI')
                     reinhard.write(i+1,7, Hue)
                     reinhard.write(i+1,8, Saturation) 
                     reinhard.write(i+1,9, Intensity)
-                    print('HSI')
+                    
                 elif(tmo_path[tmo] == 'mantiuk/'):
                     
                     if(firstRun):
@@ -544,6 +543,13 @@ try:
 except: 
     print('There was an error while finding the pictures to compare') 
 print('Finished and it took: '+str((time.time() - start_time)/60)+'minutes')
+exit()
+
+
+# In[ ]:
+
+
+
 
 
 # In[ ]:
