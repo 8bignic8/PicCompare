@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[ ]:
 
 
 import numpy as np
+from numba import jit
 import os
 import cv2
 import time
@@ -13,7 +14,7 @@ import sys
 from skimage.measure import compare_ssim
 import math
 from xlwt import Workbook
-from pytorch_msssim import ssim, ms_ssim, SSIM, MS_SSIM
+#from pytorch_msssim import ssim, ms_ssim, SSIM, MS_SSIM
 
 
 # In[ ]:
@@ -22,7 +23,7 @@ from pytorch_msssim import ssim, ms_ssim, SSIM, MS_SSIM
 
 
 
-# In[2]:
+# In[ ]:
 
 
 ##global Variable default state
@@ -49,7 +50,7 @@ global HDRgenPic
 global data
 
 
-# In[3]:
+# In[ ]:
 
 
 #Read Picture and return it
@@ -65,17 +66,48 @@ def readThePicture(picturepath):
     return img
 
 
-# In[4]:
+# In[ ]:
 
 
-def readCSV(file):
-    #https://docs.python.org/3/library/csv.html
-    print('Read data to '+str(name))
-    result = np.array(list(csv.reader(open(file, "rb"), delimiter=","))).astype("float")
-    return result
+#by: https://github.com/SVLaursen/Python-RGB-to-HSI/blob/master/converter.py
+def calc_hue(red, blue, green):
+    hue = np.copy(red)
+    i = 0
+    while(i <= int(blue.shape[0])-1):
+        j = 0
+        while (j<= int(blue.shape[1])-1):
+            hue[i][j] = 0.5 * ((red[i][j] - green[i][j]) + (red[i][j] - blue[i][j])) /                         math.sqrt((red[i][j] - green[i][j])**2 +
+                                ((red[i][j] - blue[i][j]) * (green[i][j] - blue[i][j])))
+            hue[i][j] = math.acos(hue[i][j])
+
+            if blue[i][j] <= green[i][j]:
+                hue[i][j] = hue[i][j]
+            else:
+                hue[i][j] = ((360 * math.pi) / 180.0) - hue[i][j]
+            j = j+1
+        i = i+1
+
+    return hue
 
 
-# In[5]:
+# In[ ]:
+
+
+###https://github.com/SVLaursen/Python-RGB-to-HSI/blob/master/converter.py
+def HSI(pictureToTest):
+    pictureToTest = np.float32(pictureToTest)/((2**16)-1)
+    blue = pictureToTest[:,:,0] ##pictures are in BGR
+    green = pictureToTest[:,:,1]
+    red = pictureToTest[:,:,2]
+    I = (np.divide(blue + green + red, 3)).astype(np.float64)
+    jitFunk = jit()(calc_hue)
+    H = (jitFunk(red, blue, green)).astype(np.float64)
+    minimum = np.minimum(np.minimum(red, green), blue)
+    S = (1 - (3 / (red + green + blue + 0.001) * minimum)).astype(np.float64)
+    return H.mean(),S.mean(),I.mean()
+
+
+# In[ ]:
 
 
 def savePic(picture,fileName,extention,outPath): #saves the given array as a pictures to the given output path
@@ -91,7 +123,7 @@ def savePic(picture,fileName,extention,outPath): #saves the given array as a pic
         print('--------------------')
 
 
-# In[6]:
+# In[ ]:
 
 
 def horStack(startPic,addPic):
@@ -110,7 +142,7 @@ def horStack(startPic,addPic):
     return together 
 
 
-# In[7]:
+# In[ ]:
 
 
 def vertStack(startPic,addPic):
@@ -127,7 +159,7 @@ def vertStack(startPic,addPic):
     return together 
 
 
-# In[8]:
+# In[ ]:
 
 
 def scale(img,factor):
@@ -137,7 +169,7 @@ def scale(img,factor):
     return img_new
 
 
-# In[9]:
+# In[ ]:
 
 
 # Usage:
@@ -162,14 +194,14 @@ def ssim(imageB,imageA):
     # 5. Compute the Structural Similarity Index (SSIM) between the two
     #    images, ensuring that the difference image is returned
     (score, diff) = compare_ssim(grayA, grayB, full=True)
-    diff = (diff * 255).astype("uint8") #diff image needs to be uint16 and 16 bit?
+    #diff = (diff * 255).astype("uint8") #diff image needs to be uint16 and 16 bit?
 
     # 6. You can print only the score if you want
     #print("SSIM: {}".format(score))
     return score
 
 
-# In[10]:
+# In[ ]:
 
 
 def psnrfunc(img_orig, img_out):
@@ -179,15 +211,16 @@ def psnrfunc(img_orig, img_out):
     return psnr
 
 
-# In[17]:
+# In[ ]:
 
 
 def ms_SSIM(img_orig,img_out): #or MS psnr 
+    #https://github.com/4og/mssim
     #MS_SSIM_val = ms_ssim( a, b, data_range=1, size_average=False )
     return 0
 
 
-# In[12]:
+# In[ ]:
 
 
 def text(Wtext,img):
@@ -216,7 +249,7 @@ def text(Wtext,img):
     return image
 
 
-# In[13]:
+# In[ ]:
 
 
 def inputData():
@@ -268,7 +301,7 @@ def inputData():
 inputData()
 
 
-# In[14]:
+# In[ ]:
 
 
 start_time = time.time() #start the timeing of the Prgramm
@@ -328,9 +361,9 @@ try:
                 psnr_HDRgt_SDR = (0,5,'psnr_HDRgt_SDR')
                 psnr_SDR_HDR = (0,6,'psnr_SDR_HDR')
                 
-                ms_SSIM_HDRgt_HDR = (0,7,'ms_SSIM_HDRgt_HDR')
-                ms_SSIM_HDRgt_SDR = (0,8,'ms_SSIM_HDRgt_SDR')
-                ms_SSIM_SDR_HDR = (0,9,'ms_SSIM_SDR_HDR')
+                ms_SSIM_HDRgt_HDR = (0,7,'Hue')
+                ms_SSIM_HDRgt_SDR = (0,8,'Saturation')
+                ms_SSIM_SDR_HDR = (0,9,'Intensity')
                 
                 S_GTHDR = ssim(HDRgtPic,HDRpic) #(image that will be used to compare,image that will be compared)
                 S_GTSDR = ssim(HDRgtPic,SDRpic)
@@ -339,10 +372,9 @@ try:
                 P_GTHDR = psnrfunc(HDRgtPic,HDRpic)
                 P_GTSDR = psnrfunc(HDRgtPic,SDRpic)
                 P_HDSDR = psnrfunc(HDRpic,SDRpic)
-
-                mS_GTHDR = ms_SSIM(HDRgtPic,HDRpic)
-                mS_GTSDR = ms_SSIM(HDRgtPic,SDRpic)
-                mS_HDSDR = ms_SSIM(HDRpic,SDRpic)
+                
+                
+                Hue,Saturation,Intensity = HSI(HDRpic) #Farbton (Hue), Farbsättigung (Saturation) und Helligkeit (Intensity)
                 
                 ##Reinhard save datapath
                 if(tmo_path[tmo]=='reinhard/'):
@@ -362,7 +394,7 @@ try:
                     ###number
                     
                     reinhard.write(i+1,0, currentFileName.split('.')[0])
-                    
+                    print('HSI')
                     ####SSIM
                     
                     reinhard.write(i+1,1, S_GTHDR)
@@ -376,11 +408,11 @@ try:
                     reinhard.write(i+1,6, P_HDSDR)
                     
                     ####ms_SSIM
-                    
-                    reinhard.write(i+1,7, mS_GTHDR)
-                    reinhard.write(i+1,8, mS_GTSDR) 
-                    reinhard.write(i+1,9, mS_HDSDR)
-
+                    print('HSI')
+                    reinhard.write(i+1,7, Hue)
+                    reinhard.write(i+1,8, Saturation) 
+                    reinhard.write(i+1,9, Intensity)
+                    print('HSI')
                 elif(tmo_path[tmo] == 'mantiuk/'):
                     
                     if(firstRun):
@@ -413,9 +445,9 @@ try:
                     
                     ####ms_SSIM
                     
-                    mantiuk.write(i+1,7, mS_GTHDR)
-                    mantiuk.write(i+1,8, mS_GTSDR) 
-                    mantiuk.write(i+1,9, mS_HDSDR)
+                    mantiuk.write(i+1,7, Hue)
+                    mantiuk.write(i+1,8, Saturation) 
+                    mantiuk.write(i+1,9, Intensity)
                     
                 elif(tmo_path[tmo]=='drago/'):
                     if(firstRun):
@@ -448,9 +480,9 @@ try:
                     
                     ####ms_SSIM
                     
-                    drago.write(i+1,7, mS_GTHDR)
-                    drago.write(i+1,8, mS_GTSDR) 
-                    drago.write(i+1,9, mS_HDSDR)
+                    drago.write(i+1,7, Hue)
+                    drago.write(i+1,8, Saturation) 
+                    drago.write(i+1,9, Intensity)
                     
                 elif(tmo_path[tmo]=='linear/'):
                     if(firstRun):
@@ -484,11 +516,10 @@ try:
                     
                     ####ms_SSIM
                     
-                    linear.write(i+1,7, mS_GTHDR)
-                    linear.write(i+1,8, mS_GTSDR) 
-                    linear.write(i+1,9, mS_HDSDR)
-                    
-                    
+                    linear.write(i+1,7, Hue)
+                    linear.write(i+1,8, Saturation) 
+                    linear.write(i+1,9, Intensity)
+                        
                 wb.save(xlsPath+str(mashinePath.split('/')[1])+'.xls')     
             ###Text in picture Setting 
                 if(tmo == 0):
@@ -497,29 +528,22 @@ try:
                 SDRpic = text(tmo_path[tmo].split('/')[0]+ '_SDR',SDRpic)
                 
             ###Output Picture section
-                    
-                picTure = horStack(picTure,SDRpic)
-                picTure = horStack(picTure,HDRpic)
+                
+                if(tmo == 0): #generating a white Picture to add to the right for the gt 
+                    white = (np.zeros((picTure.shape))+1*((2**16)-1)).astype(np.uint16)
+                    picTure = horStack(picTure,white)
+                
+                tmoPic = horStack(SDRpic,HDRpic)
+                picTure = vertStack(picTure,tmoPic) #adding pictures to make a 2x4 matrix picture
                 tmo = tmo + 1
             
             savePic(picTure,(str(currentFileName.split('.')[0])+'GT_RMDL'),'png',result)
             i = i+1
-            
-            #toDo
-            #if(colorSpaceAnal == True ):
-            #    savePic(picTure[:,:,0]*255,(str(i)+'Result_ColorSpace'+picName),'png',result)
-             #   savePic(picTure[],(str(i)+'Result_ColorSpace'+picName),'png',result)
-              #  savePic(picTure[],(str(i)+'Result_ColorSpace'+picName),'png',result)
+           
         
 except: 
     print('There was an error while finding the pictures to compare') 
 print('Finished and it took: '+str((time.time() - start_time)/60)+'minutes')
-
-
-# In[ ]:
-
-
-
 
 
 # In[ ]:
