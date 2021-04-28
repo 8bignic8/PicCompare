@@ -69,7 +69,7 @@ def readThePicture(picturepath):
 # In[ ]:
 
 
-#HLS(SDRpic)
+
 
 
 # In[ ]:
@@ -338,35 +338,62 @@ try:
                 psnr_HDRgt_SDR = (0,5,'psnr_HDRgt_SDR')
                 psnr_SDR_HDR = (0,6,'psnr_SDR_HDR')
                 
-                ms_SSIM_HDRgt_HDR = (0,7,'Hue')
-                ms_SSIM_HDRgt_SDR = (0,8,'Saturation')
-                ms_SSIM_SDR_HDR = (0,9,'Lightness')
+                hue_HDR = (0,7,'Hue_HDR')
+                sat_HDR = (0,8,'Saturation_HDR')
+                li_HDR = (0,9,'Lightness_HDR')
                 
+                hue_GT = (0,10,'Hue_GT')
+                sat_GT = (0,11,'Saturation_GT')
+                li_GT = (0,12,'Lightness_GT')
+                
+                hue_SDR = (0,13,'Hue_SDR')
+                sat_SDR = (0,14,'Saturation_SDR')
+                li_SDR = (0,15,'Lightness_SDR')
+                
+                ###SSIM Analyses
                 S_GTHDR = ssim(HDRgtPic,HDRpic) #(image that will be used to compare,image that will be compared)
                 S_GTSDR = ssim(HDRgtPic,SDRpic)
                 S_HDSDR = ssim(HDRpic,SDRpic)
                 
+                
+                ###PSNR Analyses
                 P_GTHDR = psnrfunc(HDRgtPic,HDRpic)
                 P_GTSDR = psnrfunc(HDRgtPic,SDRpic)
                 P_HDSDR = psnrfunc(HDRpic,SDRpic)
                 
-                #jitFunk = jit()(HLS)
+                ###HSL Analyses
                 Hue,Lightness,Saturation = HLS(HDRpic) #Farbton (Hue), Farbsättigung (Saturation) und Helligkeit (Lightness)
-               
+                SDR_Hue,SDR_Lightness,SDR_Saturation = HLS(SDRpic)
+                GT_Hue,GT_Lightness,GT_Saturation = HLS(HDRgtPic)
+                
+                
                 ##Reinhard save datapath
                 if(tmo_path[tmo]=='reinhard/'):
                     
                     if(firstRun):
+                        #picName
                         reinhard.write(pos[0], pos[1],pos[2])
+                        #SSIM
                         reinhard.write(ssim_HDRgt_HDR[0],ssim_HDRgt_HDR[1],ssim_HDRgt_HDR[2])
                         reinhard.write(ssim_HDRgt_SDR[0],ssim_HDRgt_SDR[1],ssim_HDRgt_SDR[2])
                         reinhard.write(ssim_SDR_HDR[0],ssim_SDR_HDR[1],ssim_SDR_HDR[2])
+                        #PSNR
                         reinhard.write(psnr_HDRgt_HDR[0],psnr_HDRgt_HDR[1],psnr_HDRgt_HDR[2])
                         reinhard.write(psnr_HDRgt_SDR[0],psnr_HDRgt_SDR[1],psnr_HDRgt_SDR[2])
                         reinhard.write(psnr_SDR_HDR[0],psnr_SDR_HDR[1],psnr_SDR_HDR[2])
-                        reinhard.write(ms_SSIM_HDRgt_HDR[0],ms_SSIM_HDRgt_HDR[1],ms_SSIM_HDRgt_HDR[2])
-                        reinhard.write(ms_SSIM_HDRgt_SDR[0],ms_SSIM_HDRgt_SDR[1],ms_SSIM_HDRgt_SDR[2])
-                        reinhard.write(ms_SSIM_SDR_HDR[0],ms_SSIM_SDR_HDR[1],ms_SSIM_SDR_HDR[2])
+                        #H
+                        reinhard.write(hue_HDR[0],hue_HDR[1],hue_HDR[2])
+                        reinhard.write(hue_GT[0], hue_GT[1], hue_GT[2])
+                        reinhard.write(hue_SDR[0], hue_SDR[1], hue_SDR[2])
+                        ##S
+                        reinhard.write(sat_HDR[0],sat_HDR[1],sat_HDR[2])
+                        reinhard.write(sat_GT[0], sat_GT[1], sat_GT[2])
+                        reinhard.write(sat_SDR[0], sat_SDR[1], sat_SDR[2])
+                        ##L
+                        reinhard.write(li_HDR[0],li_HDR[1],li_HDR[2])
+                        reinhard.write(li_GT[0], li_GT[1], li_GT[2])
+                        reinhard.write(li_SDR[0], li_SDR[1], li_SDR[2])
+
                         
                     ###number
                     
@@ -384,24 +411,45 @@ try:
                     reinhard.write(i+1,5, P_GTSDR)
                     reinhard.write(i+1,6, P_HDSDR)
                     
-                    ####ms_SSIM
+                    ####HSL
                     reinhard.write(i+1,7, Hue)
                     reinhard.write(i+1,8, Saturation) 
                     reinhard.write(i+1,9, Lightness)
                     
+                    reinhard.write(i+1,10, GT_Hue)
+                    reinhard.write(i+1,11, GT_Lightness)
+                    reinhard.write(i+1,12, GT_Saturation)
+                    
+                    reinhard.write(i+1,13, SDR_Hue)
+                    reinhard.write(i+1,14, SDR_Lightness)
+                    reinhard.write(i+1,15, SDR_Saturation)
+                    
                 elif(tmo_path[tmo] == 'mantiuk/'):
                     
                     if(firstRun):
+                        #Pos
                         mantiuk.write(pos[0], pos[1],pos[2])
+                        #SSIM
                         mantiuk.write(ssim_HDRgt_HDR[0],ssim_HDRgt_HDR[1],ssim_HDRgt_HDR[2])
                         mantiuk.write(ssim_HDRgt_SDR[0],ssim_HDRgt_SDR[1],ssim_HDRgt_SDR[2])
                         mantiuk.write(ssim_SDR_HDR[0],ssim_SDR_HDR[1],ssim_SDR_HDR[2])
+                        ##PSNR
                         mantiuk.write(psnr_HDRgt_HDR[0],psnr_HDRgt_HDR[1],psnr_HDRgt_HDR[2])
                         mantiuk.write(psnr_HDRgt_SDR[0],psnr_HDRgt_SDR[1],psnr_HDRgt_SDR[2])
                         mantiuk.write(psnr_SDR_HDR[0],psnr_SDR_HDR[1],psnr_SDR_HDR[2])
-                        mantiuk.write(ms_SSIM_HDRgt_HDR[0],ms_SSIM_HDRgt_HDR[1],ms_SSIM_HDRgt_HDR[2])
-                        mantiuk.write(ms_SSIM_HDRgt_SDR[0],ms_SSIM_HDRgt_SDR[1],ms_SSIM_HDRgt_SDR[2])
-                        mantiuk.write(ms_SSIM_SDR_HDR[0],ms_SSIM_SDR_HDR[1],ms_SSIM_SDR_HDR[2])
+                        #H
+                        mantiuk.write(hue_HDR[0],hue_HDR[1],hue_HDR[2])
+                        mantiuk.write(hue_GT[0], hue_GT[1], hue_GT[2])
+                        mantiuk.write(hue_SDR[0], hue_SDR[1], hue_SDR[2])
+                        ##S
+                        mantiuk.write(sat_HDR[0],sat_HDR[1],sat_HDR[2])
+                        mantiuk.write(sat_GT[0], sat_GT[1], sat_GT[2])
+                        mantiuk.write(sat_SDR[0], sat_SDR[1], sat_SDR[2])
+                        ##L
+                        mantiuk.write(li_HDR[0],li_HDR[1],li_HDR[2])
+                        mantiuk.write(li_GT[0], li_GT[1], li_GT[2])
+                        mantiuk.write(li_SDR[0], li_SDR[1], li_SDR[2])
+
                         
                     ###number
                     
@@ -419,24 +467,44 @@ try:
                     mantiuk.write(i+1,5, P_GTSDR)
                     mantiuk.write(i+1,6, P_HDSDR)
                     
-                    ####ms_SSIM
+                    ####HLS
                     
                     mantiuk.write(i+1,7, Hue)
                     mantiuk.write(i+1,8, Saturation) 
                     mantiuk.write(i+1,9, Lightness)
                     
+                    mantiuk.write(i+1,10, GT_Hue)
+                    mantiuk.write(i+1,11, GT_Lightness)
+                    mantiuk.write(i+1,12, GT_Saturation)
+                    
+                    mantiuk.write(i+1,13, SDR_Hue)
+                    mantiuk.write(i+1,14, SDR_Lightness)
+                    mantiuk.write(i+1,15, SDR_Saturation)
+                    
                 elif(tmo_path[tmo]=='drago/'):
                     if(firstRun):
+                        #POS
                         drago.write(pos[0], pos[1],pos[2])
+                        ##SSIM
                         drago.write(ssim_HDRgt_HDR[0],ssim_HDRgt_HDR[1],ssim_HDRgt_HDR[2])
                         drago.write(ssim_HDRgt_SDR[0],ssim_HDRgt_SDR[1],ssim_HDRgt_SDR[2])
                         drago.write(ssim_SDR_HDR[0],ssim_SDR_HDR[1],ssim_SDR_HDR[2])
+                        ##PSNR
                         drago.write(psnr_HDRgt_HDR[0],psnr_HDRgt_HDR[1],psnr_HDRgt_HDR[2])
                         drago.write(psnr_HDRgt_SDR[0],psnr_HDRgt_SDR[1],psnr_HDRgt_SDR[2])
                         drago.write(psnr_SDR_HDR[0],psnr_SDR_HDR[1],psnr_SDR_HDR[2])
-                        drago.write(ms_SSIM_HDRgt_HDR[0],ms_SSIM_HDRgt_HDR[1],ms_SSIM_HDRgt_HDR[2])
-                        drago.write(ms_SSIM_HDRgt_SDR[0],ms_SSIM_HDRgt_SDR[1],ms_SSIM_HDRgt_SDR[2])
-                        drago.write(ms_SSIM_SDR_HDR[0],ms_SSIM_SDR_HDR[1],ms_SSIM_SDR_HDR[2])
+                        #H
+                        drago.write(hue_HDR[0],hue_HDR[1],hue_HDR[2])
+                        drago.write(hue_GT[0], hue_GT[1], hue_GT[2])
+                        drago.write(hue_SDR[0], hue_SDR[1], hue_SDR[2])
+                        ##S
+                        drago.write(sat_HDR[0],sat_HDR[1],sat_HDR[2])
+                        drago.write(sat_GT[0], sat_GT[1], sat_GT[2])
+                        drago.write(sat_SDR[0], sat_SDR[1], sat_SDR[2])
+                        ##L
+                        drago.write(li_HDR[0],li_HDR[1],li_HDR[2])
+                        drago.write(li_GT[0], li_GT[1], li_GT[2])
+                        drago.write(li_SDR[0], li_SDR[1], li_SDR[2])
                     
                     ###number
                     
@@ -454,24 +522,46 @@ try:
                     drago.write(i+1,5, P_GTSDR)
                     drago.write(i+1,6, P_HDSDR)
                     
-                    ####ms_SSIM
+                    ####HLS
                     
                     drago.write(i+1,7, Hue)
                     drago.write(i+1,8, Saturation) 
                     drago.write(i+1,9, Lightness)
                     
+                    drago.write(i+1,10, GT_Hue)
+                    drago.write(i+1,11, GT_Lightness)
+                    drago.write(i+1,12, GT_Saturation)
+                    
+                    drago.write(i+1,13, SDR_Hue)
+                    drago.write(i+1,14, SDR_Lightness)
+                    drago.write(i+1,15, SDR_Saturation)
+                    
                 elif(tmo_path[tmo]=='linear/'):
                     if(firstRun):
+                        #Pos
                         linear.write(pos[0], pos[1],pos[2])
+                        ##SSIM
                         linear.write(ssim_HDRgt_HDR[0],ssim_HDRgt_HDR[1],ssim_HDRgt_HDR[2])
                         linear.write(ssim_HDRgt_SDR[0],ssim_HDRgt_SDR[1],ssim_HDRgt_SDR[2])
                         linear.write(ssim_SDR_HDR[0],ssim_SDR_HDR[1],ssim_SDR_HDR[2])
+                        ##PSNR
                         linear.write(psnr_HDRgt_HDR[0],psnr_HDRgt_HDR[1],psnr_HDRgt_HDR[2])
                         linear.write(psnr_HDRgt_SDR[0],psnr_HDRgt_SDR[1],psnr_HDRgt_SDR[2])
                         linear.write(psnr_SDR_HDR[0],psnr_SDR_HDR[1],psnr_SDR_HDR[2])
-                        linear.write(ms_SSIM_HDRgt_HDR[0],ms_SSIM_HDRgt_HDR[1],ms_SSIM_HDRgt_HDR[2])
-                        linear.write(ms_SSIM_HDRgt_SDR[0],ms_SSIM_HDRgt_SDR[1],ms_SSIM_HDRgt_SDR[2])
-                        linear.write(ms_SSIM_SDR_HDR[0],ms_SSIM_SDR_HDR[1],ms_SSIM_SDR_HDR[2])
+                        
+                        #H
+                        linear.write(hue_HDR[0],hue_HDR[1],hue_HDR[2])
+                        linear.write(hue_GT[0], hue_GT[1], hue_GT[2])
+                        linear.write(hue_SDR[0], hue_SDR[1], hue_SDR[2])
+                        ##S
+                        linear.write(sat_HDR[0],sat_HDR[1],sat_HDR[2])
+                        linear.write(sat_GT[0], sat_GT[1], sat_GT[2])
+                        linear.write(sat_SDR[0], sat_SDR[1], sat_SDR[2])
+                        ##L
+                        linear.write(li_HDR[0],li_HDR[1],li_HDR[2])
+                        linear.write(li_GT[0], li_GT[1], li_GT[2])
+                        linear.write(li_SDR[0], li_SDR[1], li_SDR[2])
+                        
                         firstRun = False
                     
                     ###number
@@ -490,11 +580,19 @@ try:
                     linear.write(i+1,5, P_GTSDR)
                     linear.write(i+1,6, P_HDSDR)
                     
-                    ####ms_SSIM
+                    ####HLS
                     
                     linear.write(i+1,7, Hue)
                     linear.write(i+1,8, Saturation) 
                     linear.write(i+1,9, Lightness)
+                    
+                    linear.write(i+1,10, GT_Hue)
+                    linear.write(i+1,11, GT_Lightness)
+                    linear.write(i+1,12, GT_Saturation)
+                    
+                    linear.write(i+1,13, SDR_Hue)
+                    linear.write(i+1,14, SDR_Lightness)
+                    linear.write(i+1,15, SDR_Saturation)
                         
                 wb.save(xlsPath+str(mashinePath.split('/')[1])+'.xls')     
             ###Text in picture Setting 
@@ -525,7 +623,13 @@ print('Finished and it took: '+str((time.time() - start_time)/60)+'minutes')
 # In[ ]:
 
 
-#exit()
+exit()
+
+
+# In[ ]:
+
+
+
 
 
 # In[ ]:
