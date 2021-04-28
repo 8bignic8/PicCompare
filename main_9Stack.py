@@ -69,42 +69,19 @@ def readThePicture(picturepath):
 # In[ ]:
 
 
-#by: https://github.com/SVLaursen/Python-RGB-to-HSI/blob/master/converter.py
-def calc_hue(red, blue, green):
-    hue = np.copy(red)
-    i = 0
-    while(i <= int(blue.shape[0])-1):
-        j = 0
-        while (j<= int(blue.shape[1])-1):
-            hue[i][j] = 0.5 * ((red[i][j] - green[i][j]) + (red[i][j] - blue[i][j])) /                         math.sqrt((red[i][j] - green[i][j])**2 +
-                                ((red[i][j] - blue[i][j]) * (green[i][j] - blue[i][j])))
-            hue[i][j] = math.acos(hue[i][j])
-
-            if blue[i][j] <= green[i][j]:
-                hue[i][j] = hue[i][j]
-            else:
-                hue[i][j] = ((360 * math.pi) / 180.0) - hue[i][j]
-            j = j+1
-        i = i+1
-
-    return hue
+#HLS(SDRpic)
 
 
 # In[ ]:
 
 
 ###https://github.com/SVLaursen/Python-RGB-to-HSI/blob/master/converter.py
-def HSI(pictureToTest):
-    pictureToTest = np.float32(pictureToTest)/((2**16)-1)
-    blue = pictureToTest[:,:,0] ##pictures are in BGR
-    green = pictureToTest[:,:,1]
-    red = pictureToTest[:,:,2]
-    I = (np.divide(blue + green + red, 3)).astype(np.float64)
-    jitFunk = jit()(calc_hue)
-    H = (jitFunk(red, blue, green)).astype(np.float64)
-    minimum = np.minimum(np.minimum(red, green), blue)
-    S = (1 - (3 / (red + green + blue + 0.001) * minimum)).astype(np.float64)
-    return H.mean(),S.mean(),I.mean()
+def HLS(pictureToTest):
+    pictureToTest = np.float32(pictureToTest/((2**16)-1))
+
+    pictureToTest = cv2.cvtColor(pictureToTest, cv2.COLOR_BGR2HLS).astype(np.float64)
+
+    return pictureToTest[:,:,0].mean(),pictureToTest[:,:,1].mean(),pictureToTest[:,:,2].mean()
 
 
 # In[ ]:
@@ -363,7 +340,7 @@ try:
                 
                 ms_SSIM_HDRgt_HDR = (0,7,'Hue')
                 ms_SSIM_HDRgt_SDR = (0,8,'Saturation')
-                ms_SSIM_SDR_HDR = (0,9,'Intensity')
+                ms_SSIM_SDR_HDR = (0,9,'Lightness')
                 
                 S_GTHDR = ssim(HDRgtPic,HDRpic) #(image that will be used to compare,image that will be compared)
                 S_GTSDR = ssim(HDRgtPic,SDRpic)
@@ -373,9 +350,9 @@ try:
                 P_GTSDR = psnrfunc(HDRgtPic,SDRpic)
                 P_HDSDR = psnrfunc(HDRpic,SDRpic)
                 
-                
-                Hue,Saturation,Intensity = HSI(HDRpic) #Farbton (Hue), Farbsättigung (Saturation) und Helligkeit (Intensity)
-                
+                #jitFunk = jit()(HLS)
+                Hue,Lightness,Saturation = HLS(HDRpic) #Farbton (Hue), Farbsättigung (Saturation) und Helligkeit (Lightness)
+               
                 ##Reinhard save datapath
                 if(tmo_path[tmo]=='reinhard/'):
                     
@@ -410,7 +387,7 @@ try:
                     ####ms_SSIM
                     reinhard.write(i+1,7, Hue)
                     reinhard.write(i+1,8, Saturation) 
-                    reinhard.write(i+1,9, Intensity)
+                    reinhard.write(i+1,9, Lightness)
                     
                 elif(tmo_path[tmo] == 'mantiuk/'):
                     
@@ -446,7 +423,7 @@ try:
                     
                     mantiuk.write(i+1,7, Hue)
                     mantiuk.write(i+1,8, Saturation) 
-                    mantiuk.write(i+1,9, Intensity)
+                    mantiuk.write(i+1,9, Lightness)
                     
                 elif(tmo_path[tmo]=='drago/'):
                     if(firstRun):
@@ -481,7 +458,7 @@ try:
                     
                     drago.write(i+1,7, Hue)
                     drago.write(i+1,8, Saturation) 
-                    drago.write(i+1,9, Intensity)
+                    drago.write(i+1,9, Lightness)
                     
                 elif(tmo_path[tmo]=='linear/'):
                     if(firstRun):
@@ -517,7 +494,7 @@ try:
                     
                     linear.write(i+1,7, Hue)
                     linear.write(i+1,8, Saturation) 
-                    linear.write(i+1,9, Intensity)
+                    linear.write(i+1,9, Lightness)
                         
                 wb.save(xlsPath+str(mashinePath.split('/')[1])+'.xls')     
             ###Text in picture Setting 
@@ -543,13 +520,12 @@ try:
 except: 
     print('There was an error while finding the pictures to compare') 
 print('Finished and it took: '+str((time.time() - start_time)/60)+'minutes')
-exit()
 
 
 # In[ ]:
 
 
-
+#exit()
 
 
 # In[ ]:
